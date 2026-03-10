@@ -5,7 +5,6 @@ using VehicleExplorer.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -21,7 +20,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Angular", policy =>
@@ -39,7 +37,6 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Configure middleware pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())

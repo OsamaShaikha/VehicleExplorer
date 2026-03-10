@@ -39,11 +39,9 @@ import { of, BehaviorSubject, combineLatest } from 'rxjs';
 export class VehicleSearchShellComponent implements OnInit {
     private vehicleService = inject(VehicleService);
 
-    // Form Controls
     makeControl = new FormControl<string | Make>('');
     yearControl = new FormControl<number | null>(null);
 
-    // State Signals
     makes = signal<Make[]>([]);
     filteredMakes = signal<Make[]>([]);
     vehicleTypes = signal<VehicleType[]>([]);
@@ -55,7 +53,6 @@ export class VehicleSearchShellComponent implements OnInit {
     isLoadingResults = signal<boolean>(false);
     errorMessage = signal<string>('');
 
-    // Computed Values
     years = computed(() => {
         const currentYear = new Date().getFullYear();
         const startYear = 1995;
@@ -65,17 +62,12 @@ export class VehicleSearchShellComponent implements OnInit {
     filteredModels = computed(() => {
         const models = this.vehicleModels();
         const selectedType = this.selectedVehicleType();
-        // Implementation Note: Free NHTSA API has no direct link between Model->VehicleType in GetModels call
-        // As a UI placeholder logic (since models don't return type IDs usually), we just filter all
-        // In a real app we'd map this, but the api doesn't provide filtering by type here directly easily 
-        // unless mapped, so we'll show all models or pretend filter if valid
         return models;
     });
 
     ngOnInit() {
         this.loadMakes();
 
-        // Autocomplete filtering for Makes
         this.makeControl.valueChanges.pipe(
             startWith(''),
             map(value => typeof value === 'string' ? value : value?.makeName || '')
@@ -83,7 +75,6 @@ export class VehicleSearchShellComponent implements OnInit {
             this.filterMakes(filterValue);
         });
 
-        // React to Make/Year Selection
         combineLatest([
             this.makeControl.valueChanges.pipe(distinctUntilChanged()),
             this.yearControl.valueChanges.pipe(distinctUntilChanged())
@@ -101,22 +92,16 @@ export class VehicleSearchShellComponent implements OnInit {
     }
 
     private loadMakes() {
-        console.log('Loading makes...');
         this.isLoadingMakes.set(true);
         this.vehicleService.getMakes().pipe(
             catchError(err => {
-                console.error('Error loading makes:', err);
                 this.errorMessage.set('Failed to load makes: ' + err.message);
                 return of({ success: false, data: [] as Make[], count: 0 });
             })
         ).subscribe(res => {
-            console.log('Makes response:', res);
             if (res.success) {
-                console.log('Setting makes:', res.data.length);
                 this.makes.set(res.data);
                 this.filteredMakes.set(res.data);
-            } else {
-                console.log('Response not successful');
             }
             this.isLoadingMakes.set(false);
         });

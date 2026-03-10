@@ -18,9 +18,6 @@ public class VehiclesController : ControllerBase
         _mediator = mediator;
     }
 
-    /// <summary>
-    /// Get all car makes
-    /// </summary>
     [HttpGet("makes")]
     [ProducesResponseType(200)]
     public async Task<IActionResult> GetAllMakes(CancellationToken cancellationToken)
@@ -29,9 +26,6 @@ public class VehiclesController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Get vehicle types for a given make
-    /// </summary>
     [HttpGet("makes/{makeId:int}/vehicle-types")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -41,9 +35,6 @@ public class VehiclesController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Get models for a given make and year
-    /// </summary>
     [HttpGet("makes/{makeId:int}/models")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
