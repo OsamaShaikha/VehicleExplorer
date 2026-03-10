@@ -1,0 +1,105 @@
+<div class="search-container">
+  <mat-card class="search-card">
+    <mat-card-header>
+      <mat-card-title>Vehicle Explorer</mat-card-title>
+      <mat-card-subtitle>Find available models and types</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content class="form-content">
+      <form class="search-form">
+        <!-- Make Selector with Autocomplete -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Car Make</mat-label>
+          <input type="text" 
+                 matInput 
+                 [formControl]="makeControl" 
+                 [matAutocomplete]="auto"
+                 placeholder="Start typing to search...">
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayMakeFn" autoActiveFirstOption>
+            @if (filteredMakes().length === 0) {
+              <mat-option disabled>No makes found</mat-option>
+            }
+            @for (make of filteredMakes(); track make.makeId) {
+              <mat-option [value]="make">
+                {{ make.makeName }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+          @if (isLoadingMakes()) {
+            <mat-spinner matSuffix diameter="20"></mat-spinner>
+          }
+          @if (!isLoadingMakes() && makes().length > 0) {
+            <mat-hint>{{ makes().length }} makes available</mat-hint>
+          }
+        </mat-form-field>
+
+        <!-- Year Selector -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Manufacture Year</mat-label>
+          <mat-select [formControl]="yearControl">
+            <mat-option *ngFor="let year of years()" [value]="year">
+              {{ year }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="results-container">
+    @if (isLoadingResults()) {
+      <div class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Fetching vehicle details...</p>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="error-state">
+        <mat-icon color="warn">error</mat-icon>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    }
+
+    @if (!isLoadingResults() && vehicleModels().length > 0) {
+      <div class="results-grid">
+        <div class="filters">
+          <h3>Available Types</h3>
+          <mat-chip-listbox>
+            @for (type of vehicleTypes(); track type.vehicleTypeId) {
+              <mat-chip-option 
+                [selected]="selectedVehicleType() === type.vehicleTypeId"
+                (click)="selectType(type.vehicleTypeId)">
+                {{ type.vehicleTypeName }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+
+        <div class="models">
+          <h3>Models Found ({{ vehicleModels().length }})</h3>
+          <div class="model-cards">
+            @for (model of filteredModels(); track model.modelId) {
+              <mat-card class="model-card">
+                <mat-card-content>
+                  <mat-icon color="primary">directions_car</mat-icon>
+                  <span>{{ model.modelName }}</span>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </div>
+    } @else if (!isLoadingResults() && yearControl.value && (makeControl.value | json) !== '""' && vehicleModels().length === 0 && !errorMessage()) {
+        <div class="empty-state">
+          <mat-icon>search_off</mat-icon>
+          <p>No models found for this Make and Year.</p>
+        </div>
+    } @else if (!isLoadingResults() && !yearControl.value) {
+        <div class="empty-state hint">
+          <mat-icon>manage_search</mat-icon>
+          <p>Select a Make and Year to view available vehicle configurations.</p>
+        </div>
+    }
+  </div>
+</div>
